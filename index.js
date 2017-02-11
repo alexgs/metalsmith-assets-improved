@@ -1,52 +1,35 @@
-let debug = require( 'debug' )( 'metalsmith-nested-collections' );
-let collections = require( 'metalsmith-collections' );
-let addCollectionLinks = require( './lib/helpers/addCollectionLinks' );
+let debug = require( 'debug' )( 'metalsmith-assets-improved' );
 
+/**
+ * Include static assets in a Metalsmith build
+ *
+ * @param {Object | Array} [options] (optional) A configuration object with one
+ * or more of the following fields (all are optional). To copy from more than
+ * one source or to more than one destination, pass an array of configuration
+ * objects.
+ *   @property {String} [src] Directory to copy files _from_. Relative paths are
+ *   resolved against the Metalsmith project directory (i.e. `src` can be a
+ *   sibling to the directory used as Metalsmith's source). Defaults to
+ *   `./assets`.
+ *   @property {String} [dest] Directory to copy files _to_. Relative paths are
+ *   resolved against the directory configured via's Metalsmith `destination`
+ *   function. Defaults to `.` (i.e. the same as `destination`).
+ *   @property {String} [replace] Which, if any, files in the `dest` folder
+ *   should be overwritten during the build process. Possible values are
+ *     - 'all' (all files will be overwritten)
+ *     - 'old' (files in `dest` older than their counterparts in `src` will
+ *       be overwritten)
+ *     - 'none' (no files in `dest` will be overwritten, but files in `src`
+ *       without a counterpart will be copied to `dest`.
+ *   Defaults to 'none'.
+ * @returns {Function} Worker for the Metalsmith build process
+ */
 let plugin = function plugin( options ) {
 
-    /*
-     * A Metalsmith plugin is basically a factory that returns a "worker"
-     * function (for lack of a better term). Metalsmith calls the worker
-     * function on its turn, and the worker modifies the files, metadata, etc.
-     * These transformations happen in place and are available to the next
-     * worker in the chain. Since this plugin is a drop-in replacement for
-     * "metalsmith collections," we need to get the worker function from the
-     * original plugin.
-     */
-    let oldWorker = collections( options );
-
-    /*
-     * This statement returns the default worker function for "nested
-     * collections"
-     */
     return function( files, metalsmith, done ) {
-        /*
-         * Set the next function to run once we are done
-         */
+        // Set the next function to run once we are done
         setImmediate( done );
 
-        /*
-         * Create a new worker function inside the default worker function.
-         * We will pass this worker to the `oldWorker` function so that
-         * `oldWorker` will call `newWorker` when `oldWorker` is done doing its
-         * thing. The arguments to the default worker will be available to
-         * `newWorker` and `oldWorker` thanks to the magic of closure.
-         *
-         * In fact, this magic will allow `oldWorker` to make changes to, e.g.,
-         * the `files` argument. Then these changes will be available to
-         * `newWorker` even though we are **NOT** passing any data between the
-         * functions! See? Magic. <poof... disappears>
-         */
-        let newWorker = function() {
-            let metadata = metalsmith.metadata();
-            addCollectionLinks( metadata );
-        };
-
-        /*
-         * Call the original worker function, and pass it the new worker. Oldie
-         * will call this function when its done with its work.
-         */
-        oldWorker( files, metalsmith, newWorker );
     }
 };
 
