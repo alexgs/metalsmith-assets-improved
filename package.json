@@ -20,12 +20,12 @@
   },
   "license": "BSD-3-Clause",
   "dependencies": {
-    "debug": "^2.2.0"
+    "debug": "^2.2.0",
+    "fs-extra": "^2.0.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
     "dirty-chai": "^1.2.2",
-    "metalsmith": "^2.3.0",
-    "rimraf": "^2.5.4"
+    "metalsmith": "^2.3.0"
   }
 }
