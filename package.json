@@ -1,0 +1,31 @@
+{
+  "name": "metalsmith-assets-improved",
+  "version": "1.0.0-alpha1",
+  "description": "Include static assets in a Metalsmith build",
+  "main": "index.js",
+  "engines": {
+    "node": ">=6.9.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/philgs/metalsmith-assets-improved.git"
+  },
+  "author": {
+    "name": "Phil Gates-Shannon",
+    "email": "phil.gs@gmail.com",
+    "url": "http://philgs.me"
+  },
+  "scripts": {
+    "test": "mocha --reporter spec"
+  },
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "debug": "^2.2.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "dirty-chai": "^1.2.2",
+    "metalsmith": "^2.3.0",
+    "rimraf": "^2.5.4"
+  }
+}

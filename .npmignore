@@ -1,0 +1,3 @@
+.idea/
+test/**/build
+test/nested-fixtures/basic/*.json
