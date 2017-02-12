@@ -26,6 +26,7 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "dirty-chai": "^1.2.2",
+    "lodash": "^4.17.4",
     "metalsmith": "^2.3.0"
   }
 }

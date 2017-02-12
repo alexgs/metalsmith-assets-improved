@@ -3,7 +3,8 @@ let chai = require( 'chai' );
 let dirtyChai = require( 'dirty-chai' );
 let Metalsmith = require( 'metalsmith' );
 let path = require( 'path' );
-let fs = require('fs-extra');
+let fs = require( 'fs-extra' );
+let _ = require( 'lodash' );
 
 let metalsmithReplacer = require( '../lib/utilities/metalsmithReplacer' );
 let saveMetadata = require( '../lib/utilities/saveMetadata' );
@@ -18,13 +19,34 @@ describe( 'metalsmith-assets-improved', function() {
         fs.removeSync( fixtureRoot + '/*/build' );
     } );
 
-    context( '(when given a configuration object)', function(){
+    let getExpected = function( fixturePath, options ) {
+        // Set paths
+        let defaults = {
+            src: path.resolve( fixturePath, 'assets' ),
+            dest: path.resolve( fixturePath, 'build' )
+        };
+        let expected = _.merge( {}, defaults, options );
+
+        // Read file info
+        let files = fs.readdirSync( expected.src );
+        expected.files = _( files )
+            .keyBy( file => file )
+            .mapValues( ( value, key ) => {
+                let file = path.resolve( expected.src, key );
+                return fs.statSync( file );
+            } )
+            .pickBy( ( value, key ) => value.isFile() );
+
+        return expected;
+    };
+
+    context( '(when given a configuration object)', function() {
 
         it( 'does something', function( done ) {
             let fixturePath = path.resolve( fixtureRoot, 'basic' );
             let metalsmith = Metalsmith( fixturePath );
             metalsmith
-                .use( assets(  ) )
+                .use( assets() )
                 .build( function( err, files ) {
                     if ( err ) return done( err );
                     //noinspection JSCheckFunctionSignatures
@@ -44,10 +66,8 @@ describe( 'metalsmith-assets-improved', function() {
                 } );
         } );
 
-        it( 'copies files from the default source directory' );
-        it( 'copies files to the default destination directory' );
-        it( 'copies files from a configured source directory' );
-        it( 'copies files to a configured destination directory' );
+        it( 'copies files from the default source directory to the default destination directory' );
+        it( 'copies files from a configured source directory to a configured destination directory' );
         it( 'does not overwrite files when no "replace" option is given' );
         it( 'does not overwrite files when the "replace" option is set to "none"' );
         it( 'does copies new files when the "replace" option is set to "none"' );
@@ -56,8 +76,7 @@ describe( 'metalsmith-assets-improved', function() {
     } );
 
     context( '(when given an array of configuration objects)', function() {
-        it( 'copies files from all configured source directories' );
-        it( 'copies files to all configured destination directories' );
+        it( 'copies files from all configured source directories to all configured destination directories' );
         it( 'correctly observes the "replace" option of each config object' );
     } );
 
