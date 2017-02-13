@@ -22,7 +22,8 @@ let readFileStats = function( directory ) {
             let file = path.resolve( directory, key );
             return fs.statSync( file );
         } )
-        .pickBy( ( value, key ) => value.isFile() );
+        .pickBy( ( value, key ) => value.isFile() )
+        .value();
 };
 
 let compareFileStats = function( expected, actual ) {
@@ -93,31 +94,22 @@ describe( 'metalsmith-assets-improved', function() {
 
     context( '(when given a configuration object)', function() {
 
-        it( 'does something', function( done ) {
+        it( 'copies files from the default source directory to the default destination directory', function( done ) {
             let fixturePath = path.resolve( fixtureRoot, 'basic' );
             let metalsmith = Metalsmith( fixturePath );
             metalsmith
                 .use( assets() )
-                .build( function( err, files ) {
+                .build( function( err ) {
                     if ( err ) return done( err );
-                    //noinspection JSCheckFunctionSignatures
-                    let metadata = metalsmith.metadata();
 
-                    // Save file and collection metadata to JSON files
-                    let metadataCollection = {
-                        files: files,
-                        collections: metadata
-                    };
-                    saveMetadata( fixturePath, metadataCollection );
-
-                    // >>> TEST HERE << \\
-                    expect( 1 + 1 ).to.equal( 3 );
-
+                    // >>> TEST HERE <<< \\
+                    let expected = getExpected( fixturePath );
+                    let actualFiles = readFileStats( path.resolve( fixturePath, 'build' ) );
+                    compareFileStats( expected.files, actualFiles );
                     done();
                 } );
         } );
 
-        it( 'copies files from the default source directory to the default destination directory' );
         it( 'copies files from a configured source directory to a configured destination directory' );
         it( 'does not overwrite files when no "replace" option is given' );
         it( 'does not overwrite files when the "replace" option is set to "none"' );
