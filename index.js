@@ -1,4 +1,8 @@
 let debug = require( 'debug' )( 'metalsmith-assets-improved' );
+let fs = require( 'fs-extra' );
+let _ = require( 'lodash' );
+
+let metalsmithReplacer = require( './lib/utilities/metalsmithReplacer' );
 
 /**
  * Include static assets in a Metalsmith build
@@ -30,6 +34,28 @@ let plugin = function plugin( options ) {
         // Set the next function to run once we are done
         setImmediate( done );
 
+        // Default paths, relative to Metalsmith working directory
+        let defaults = {
+            src: 'assets',
+            dest: '.'
+        };
+
+        // Merge options and resolve src/dest paths
+        let config = _.merge( { }, defaults, options );
+        config.src = metalsmith.path( config.src );
+        config.dest = metalsmith.path( metalsmith.destination(), config.dest );
+
+        // Set options for `fs-extra` copy operation--options set to default are marked
+        let copyOptions = {
+            overwrite: true,                // default
+            errorOnExist: false,            // default
+            dereference: false,             // default
+            preserveTimestamps: true,
+            filter: undefined
+        };
+
+        // Make it so!
+        fs.copySync( config.src, config.dest, copyOptions );
     }
 };
 

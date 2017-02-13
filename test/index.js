@@ -29,14 +29,21 @@ let readFileStats = function( directory ) {
 let compareFileStats = function( expected, actual ) {
     let expectedFiles = _.keys( expected );
     let actualFiles = _.keys( actual );
-    expect( actualFiles ).to.include( expectedFiles );
+
+    // console.log( expectedFiles );
+
+    expect( actualFiles ).to.include.members( expectedFiles );
     // expect( actual ).to.contain.all.keys( expectedFiles );
 
-    expectedFiles.forEach( ( expectedStat, file ) => {
+    expectedFiles.forEach( file => {
         let actualStat = actual[ file ];
+        let expectedStat = expected[ file ];
         expect( expectedStat.size ).to.equal( actualStat.size );
-        expect( expectedStat.mtime ).to.equalDate( actualStat.mtime );
-        expect( expectedStat.mtime ).to.equalTime( actualStat.mtime );
+        // expect( expectedStat.mtime ).to.equalDate( actualStat.mtime );
+        // expect( expectedStat.mtime ).to.equalTime( actualStat.mtime );
+        expect( expectedStat.mtime.getTime() ).to.be.closeTo( actualStat.mtime.getTime(), 500 );
+        // TODO make this comparison use MomentJS
+        // Because copying the time stamps only works to the second and drop milliseconds, we need a little fudge factor here
     } );
 };
 
