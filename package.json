@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
+    "chai-datetime": "^1.4.1",
     "dirty-chai": "^1.2.2",
     "lodash": "^4.17.4",
     "metalsmith": "^2.3.0"

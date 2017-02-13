@@ -8,6 +8,10 @@ declare global {
             ok(): Assertion;
             true(): Assertion;
             false(): Assertion;
+
+            // chai-datetime
+            equalDate( date:Date ): Assertion;
+            equalTime( date:Date ): Assertion;
         }
     }
 }

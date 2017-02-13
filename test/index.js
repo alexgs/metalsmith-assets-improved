@@ -1,16 +1,43 @@
 let assets = require( '../index' );
 let chai = require( 'chai' );
+let chaiDatetime = require( 'chai-datetime' );
 let dirtyChai = require( 'dirty-chai' );
+let fs = require( 'fs-extra' );
 let Metalsmith = require( 'metalsmith' );
 let path = require( 'path' );
-let fs = require( 'fs-extra' );
 let _ = require( 'lodash' );
 
 let metalsmithReplacer = require( '../lib/utilities/metalsmithReplacer' );
 let saveMetadata = require( '../lib/utilities/saveMetadata' );
 
+chai.use( chaiDatetime );
 chai.use( dirtyChai );
 let expect = chai.expect;
+
+let readFileStats = function( directory ) {
+    let fileList = fs.readdirSync( directory );
+    return _( fileList )
+        .keyBy( file => file )
+        .mapValues( ( value, key ) => {
+            let file = path.resolve( directory, key );
+            return fs.statSync( file );
+        } )
+        .pickBy( ( value, key ) => value.isFile() );
+};
+
+let compareFileStats = function( expected, actual ) {
+    let expectedFiles = _.keys( expected );
+    let actualFiles = _.keys( actual );
+    expect( actualFiles ).to.include( expectedFiles );
+    // expect( actual ).to.contain.all.keys( expectedFiles );
+
+    expectedFiles.forEach( ( expectedStat, file ) => {
+        let actualStat = actual[ file ];
+        expect( expectedStat.size ).to.equal( actualStat.size );
+        expect( expectedStat.mtime ).to.equalDate( actualStat.mtime );
+        expect( expectedStat.mtime ).to.equalTime( actualStat.mtime );
+    } );
+};
 
 describe( 'metalsmith-assets-improved', function() {
     const fixtureRoot = path.resolve( __dirname, 'fixtures' );
@@ -19,23 +46,47 @@ describe( 'metalsmith-assets-improved', function() {
         fs.removeSync( fixtureRoot + '/*/build' );
     } );
 
+    /**
+     * Gets an object containing the expected results of executing the "assets
+     * improved" plugin.
+     * @param {String} fixturePath The path to the test fixture
+     * @param {Object} [options] The options object as passed to the `assets` function.
+     * Unlike that function, this test helper does **not** accept n array of
+     * configuration objects.
+     * @returns {Object} A "expected properties" object with the following
+     * properties:
+     *   @property {String} src Absolute path to the source directory for the
+     *   test.
+     *   @property {String} dest Absolute path to destination directory for the
+     *   test.
+     *   @property {Object} files An object having filenames from `src` as its
+     *   keys and corresponding `fs.Stats` objects for values.
+     * Any additional properties on the optional `options` object will be
+     * copied to this object.
+     */
     let getExpected = function( fixturePath, options ) {
-        // Set paths
+        // Set default paths
         let defaults = {
             src: path.resolve( fixturePath, 'assets' ),
-            dest: path.resolve( fixturePath, 'build' )
+            dest: path.resolve( fixturePath, 'build', '.' )
         };
-        let expected = _.merge( {}, defaults, options );
+
+        // Resolve paths in `options`, if any
+        let optionPaths = { };
+        if ( options ) {
+            [ 'src', 'dest' ].forEach( prop => {
+                if ( options[ prop ] ) {
+                    let target = options[ prop ];
+                    optionPaths[ prop ] = path.resolve( fixturePath, target );
+                }
+            } );
+        }
+
+        // Merge objects
+        let expected = _.merge( {}, defaults, options, optionPaths );
 
         // Read file info
-        let files = fs.readdirSync( expected.src );
-        expected.files = _( files )
-            .keyBy( file => file )
-            .mapValues( ( value, key ) => {
-                let file = path.resolve( expected.src, key );
-                return fs.statSync( file );
-            } )
-            .pickBy( ( value, key ) => value.isFile() );
+        expected.files = readFileStats( expected.src );
 
         return expected;
     };
