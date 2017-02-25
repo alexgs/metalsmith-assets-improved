@@ -29,6 +29,8 @@ let readFileStats = function( directory ) {
 let compareFileStats = function( expected, actual ) {
     let expectedFiles = _.keys( expected );
     let actualFiles = _.keys( actual );
+    // console.log( '>>> Expected <<<\n', JSON.stringify( expectedFiles, null, 2 ) );
+    // console.log( '>>> Actual <<<\n', JSON.stringify( actualFiles, null, 2 ) );
 
     expect( actualFiles ).to.include.members( expectedFiles );
 
@@ -77,13 +79,11 @@ describe( 'metalsmith-assets-improved', function() {
 
         // Resolve paths in `options`, if any
         let optionPaths = { };
-        if ( options ) {
-            [ 'src', 'dest' ].forEach( prop => {
-                if ( options[ prop ] ) {
-                    let target = options[ prop ];
-                    optionPaths[ prop ] = path.resolve( fixturePath, target );
-                }
-            } );
+        if ( _.has( options, 'src' ) ) {
+            optionPaths.src = path.resolve( fixturePath, options.src );
+        }
+        if ( _.has( options, 'dest' ) ) {
+            optionPaths.dest = path.resolve( fixturePath, 'build', options.dest );
         }
 
         // Merge objects
@@ -106,13 +106,31 @@ describe( 'metalsmith-assets-improved', function() {
                     if ( err ) return done( err );
 
                     let expected = getExpected( fixturePath );
-                    let actualFiles = readFileStats( path.resolve( fixturePath, 'build' ) );
+                    let actualFiles = readFileStats( path.resolve( fixturePath, 'build', '.' ) );
                     compareFileStats( expected.files, actualFiles );
                     done();
                 } );
         } );
 
-        it( 'copies files from a configured source directory to a configured destination directory' );
+        it( 'copies files from a configured source directory to a configured destination directory', function( done ) {
+            let fixturePath = path.resolve( fixtureRoot, 'custom' );
+            let metalsmith = Metalsmith( fixturePath );
+            let assetOptions = {
+                src: 'static',
+                dest: 'static'
+            };
+            metalsmith
+                .use( assets( assetOptions ) )
+                .build( function( err ) {
+                    if ( err ) return done( err );
+
+                    let expected = getExpected( fixturePath, assetOptions );
+                    let actualFiles = readFileStats( path.resolve( fixturePath, 'build', assetOptions.dest ) );
+                    compareFileStats( expected.files, actualFiles );
+                    done();
+                } );
+        } );
+
         it( 'does not overwrite files when no "replace" option is given' );
         it( 'does not overwrite files when the "replace" option is set to "none"' );
         it( 'does copies new files when the "replace" option is set to "none"' );
