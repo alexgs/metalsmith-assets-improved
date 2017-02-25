@@ -1,6 +1,6 @@
 let assets = require( '../index' );
 let chai = require( 'chai' );
-let chaiDatetime = require( 'chai-datetime' );
+let chaiMoment = require( 'chai-moment-js' );
 let dirtyChai = require( 'dirty-chai' );
 let fs = require( 'fs-extra' );
 let Metalsmith = require( 'metalsmith' );
@@ -10,7 +10,7 @@ let _ = require( 'lodash' );
 let metalsmithReplacer = require( '../lib/utilities/metalsmithReplacer' );
 let saveMetadata = require( '../lib/utilities/saveMetadata' );
 
-chai.use( chaiDatetime );
+chai.use( chaiMoment );
 chai.use( dirtyChai );
 let expect = chai.expect;
 
@@ -30,20 +30,16 @@ let compareFileStats = function( expected, actual ) {
     let expectedFiles = _.keys( expected );
     let actualFiles = _.keys( actual );
 
-    // console.log( expectedFiles );
-
     expect( actualFiles ).to.include.members( expectedFiles );
-    // expect( actual ).to.contain.all.keys( expectedFiles );
 
     expectedFiles.forEach( file => {
         let actualStat = actual[ file ];
         let expectedStat = expected[ file ];
         expect( expectedStat.size ).to.equal( actualStat.size );
-        // expect( expectedStat.mtime ).to.equalDate( actualStat.mtime );
-        // expect( expectedStat.mtime ).to.equalTime( actualStat.mtime );
-        expect( expectedStat.mtime.getTime() ).to.be.closeTo( actualStat.mtime.getTime(), 500 );
-        // TODO make this comparison use MomentJS
-        // Because copying the time stamps only works to the second and drop milliseconds, we need a little fudge factor here
+
+        // Because copying the time stamps only works to the second and drops
+        // milliseconds, we need a little fudge factor here
+        expect( expectedStat.mtime ).is.same.moment( actualStat.mtime, 'second' );
     } );
 };
 
@@ -58,10 +54,10 @@ describe( 'metalsmith-assets-improved', function() {
      * Gets an object containing the expected results of executing the "assets
      * improved" plugin.
      * @param {String} fixturePath The path to the test fixture
-     * @param {Object} [options] The options object as passed to the `assets` function.
-     * Unlike that function, this test helper does **not** accept n array of
-     * configuration objects.
-     * @returns {Object} A "expected properties" object with the following
+     * @param {Object} [options] The options object as passed to the `assets`
+     * function. Unlike that function, this test helper does **not** accept an
+     * array of configuration objects.
+     * @returns {Object} An "expected properties" object with the following
      * properties:
      *   @property {String} src Absolute path to the source directory for the
      *   test.
@@ -109,7 +105,6 @@ describe( 'metalsmith-assets-improved', function() {
                 .build( function( err ) {
                     if ( err ) return done( err );
 
-                    // >>> TEST HERE <<< \\
                     let expected = getExpected( fixturePath );
                     let actualFiles = readFileStats( path.resolve( fixturePath, 'build' ) );
                     compareFileStats( expected.files, actualFiles );
