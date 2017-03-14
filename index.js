@@ -1,8 +1,35 @@
 let debug = require( 'debug' )( 'metalsmith-assets-improved' );
 let fs = require( 'fs-extra' );
+let path = require( 'path' );
 let _ = require( 'lodash' );
 
 // let metalsmithReplacer = require( './lib/utilities/metalsmithReplacer' );
+
+let getFilter = function( replace, src, dest ) {
+    let filter = null;
+    switch ( replace ) {
+        default:
+            // Do not copy if destination file exists, regardless of modification time
+            filter = function( file ) {
+                let destFile = resolveDestFile( file, dest );
+                // console.log( `>>> ${destFile} exist: ${fs.existsSync( destFile )} <<<` );
+                //noinspection RedundantIfStatementJS
+                if ( fs.existsSync( destFile ) ) {
+                    // console.log( `<<< ${destFile} exists, not copying >>>` );
+                    return false;
+                } else {
+                    // console.log( `<<< Copying ${file} to ${destFile} >>>` );
+                    return true;
+                }
+            }
+    }
+    return filter;
+};
+
+let resolveDestFile = function( file, dest ) {
+    let base = path.basename( file );
+    return path.resolve( dest, base );
+};
 
 /**
  * Include static assets in a Metalsmith build
@@ -29,6 +56,11 @@ let _ = require( 'lodash' );
  * @returns {Function} Worker for the Metalsmith build process
  */
 let plugin = function plugin( options ) {
+    // Make sure there is an `options` object with a `replace` property
+    options = _.merge( {}, options );
+    if ( !_.has( 'replace' ) ) {
+        options.replace = undefined;
+    }
 
     return function( files, metalsmith, done ) {
         // Set the next function to run once we are done
@@ -51,7 +83,7 @@ let plugin = function plugin( options ) {
             errorOnExist: false,            // default
             dereference: false,             // default
             preserveTimestamps: true,
-            filter: undefined
+            filter: getFilter( config.replace, config.src, config.dest )
         };
 
         // Make it so!

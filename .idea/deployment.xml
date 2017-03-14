@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData">
+  <component name="PublishConfigData" serverName="metalsmith.sword" exclude=".svn;.cvs;.idea;.DS_Store;.git;.hg;node_modules">
     <serverData>
       <paths name="Adventurology">
         <serverdata>
@@ -20,6 +20,13 @@
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="metalsmith.sword">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/metalsmith-assets-improved" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
