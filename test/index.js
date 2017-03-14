@@ -18,10 +18,8 @@ let expect = chai.expect;
 
 let noOverwriteComparison = function( expectedStat, actualStat, destFileIsOlder, filename ) {
     if ( destFileIsOlder ) {
-        // expect( expectedStat.mtime ).is.before.moment( actualStat.mtime, 'second' );
         expect( expectedStat.mtime, `<<< ${filename} >>>` ).is.after.moment( actualStat.mtime, 'second' );
     } else {
-        // expect( expectedStat.mtime ).is.after.moment( actualStat.mtime, 'second' );
         expect( expectedStat.mtime, `<<< ${filename} >>>` ).is.before.moment( actualStat.mtime, 'second' );
     }
 };
@@ -29,8 +27,6 @@ let noOverwriteComparison = function( expectedStat, actualStat, destFileIsOlder,
 let compareFileStats = function( expected, actual, replace ) {
     let expectedFiles = _.keys( expected );
     let actualFiles = _.keys( actual );
-    // console.log( '>>> Expected <<<\n', JSON.stringify( expectedFiles, null, 2 ) );
-    // console.log( '>>> Actual <<<\n', JSON.stringify( actualFiles, null, 2 ) );
 
     expect( actualFiles ).to.include.members( expectedFiles );
 
@@ -50,7 +46,7 @@ let compareFileStats = function( expected, actual, replace ) {
                     throw new Error( 'Unimplemented method' );
                     break;
                 case 'none':
-                    throw new Error( 'Unimplemented method' );
+                    noOverwriteComparison( expectedStat, actualStat, compareTimestamps, file );
                     break;
                 default: noOverwriteComparison( expectedStat, actualStat, compareTimestamps, file );
             }
@@ -143,14 +139,6 @@ describe( 'metalsmith-assets-improved', function() {
             helpers.createTempFilePair( fixturePath, null, true );
             helpers.createTempFilePair( fixturePath, null, false );
 
-            // let srcPath, destPath;
-            // [ srcPath, destPath ] = helpers.createTempFilePair( fixturePath, null, true );
-            // expect( fs.existsSync( srcPath ) ).to.equal( true );
-            // expect( fs.existsSync( destPath ) ).to.equal( true );
-            // [ srcPath, destPath ] = helpers.createTempFilePair( fixturePath, null, false );
-            // expect( fs.existsSync( srcPath ) ).to.equal( true );
-            // expect( fs.existsSync( destPath ) ).to.equal( true );
-
             let metalsmith = Metalsmith( fixturePath );
             metalsmith
                 .clean( false )
@@ -164,10 +152,32 @@ describe( 'metalsmith-assets-improved', function() {
 
                     done();
                 } );
-            // done();
         } );
 
-        it( 'does not overwrite files when the "replace" option is set to "none"' );
+        it( 'does not overwrite files when the "replace" option is set to "none"', function( done ) {
+            let fixturePath = path.resolve( fixtureRoot, 'replace2' );
+
+            // Create a set of duplicate files, one older and one newer
+            helpers.createTempFilePair( fixturePath, null, true );
+            helpers.createTempFilePair( fixturePath, null, false );
+
+            let metalsmith = Metalsmith( fixturePath );
+            let assetOptions = {
+                replace: 'none'
+            };
+            metalsmith
+                .clean( false )
+                .use( assets( assetOptions ) )
+                .build( function( err ) {
+                    if ( err ) return done( err );
+
+                    let expected = getExpected( fixturePath );
+                    let actualFiles = helpers.readFileStats( path.resolve( fixturePath, 'build', '.' ) );
+                    compareFileStats( expected.files, actualFiles, assetOptions.replace );
+
+                    done();
+                } );
+        } );
         it( 'copies only new files when the "replace" option is set to "none"' );
         it( 'overwrites files when the "replace" option is set to "all"' );
         it( 'only overwrites older files when the "replace" option is set to "old"' );

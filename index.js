@@ -8,17 +8,14 @@ let _ = require( 'lodash' );
 let getFilter = function( replace, src, dest ) {
     let filter = null;
     switch ( replace ) {
-        default:
+        default:        // This is used if `replace` is 'none' or undefined
             // Do not copy if destination file exists, regardless of modification time
             filter = function( file ) {
                 let destFile = resolveDestFile( file, dest );
-                // console.log( `>>> ${destFile} exist: ${fs.existsSync( destFile )} <<<` );
                 //noinspection RedundantIfStatementJS
                 if ( fs.existsSync( destFile ) ) {
-                    // console.log( `<<< ${destFile} exists, not copying >>>` );
                     return false;
                 } else {
-                    // console.log( `<<< Copying ${file} to ${destFile} >>>` );
                     return true;
                 }
             }

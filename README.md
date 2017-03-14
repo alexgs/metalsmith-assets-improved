@@ -6,6 +6,10 @@
 [2]: https://github.com/treygriffith/metalsmith-assets
 [3]: https://github.com/thehydroimpulse/metalsmith-static
 
+## Usage
+
+It is highly recommended to set `metalsmith.clean(false)` if you are using the `replace` option. Otherwise, Metalsmith will delete all of your old build files each time it runs, which makes the `replace` option pretty pointless.
+
 ## License
 
 The content of this repository is licensed under the [3-Clause BSD license][4]. Please see the enclosed [license file][5] for specific terms.
