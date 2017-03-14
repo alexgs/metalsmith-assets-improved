@@ -2,7 +2,7 @@ let debug = require( 'debug' )( 'metalsmith-assets-improved' );
 let fs = require( 'fs-extra' );
 let _ = require( 'lodash' );
 
-let metalsmithReplacer = require( './lib/utilities/metalsmithReplacer' );
+// let metalsmithReplacer = require( './lib/utilities/metalsmithReplacer' );
 
 /**
  * Include static assets in a Metalsmith build
@@ -57,6 +57,7 @@ let plugin = function plugin( options ) {
         // Make it so!
         fs.copySync( config.src, config.dest, copyOptions );
     }
+
 };
 
 module.exports = plugin;
