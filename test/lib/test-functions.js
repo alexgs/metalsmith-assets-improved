@@ -17,6 +17,11 @@ let noOverwriteComparison = function( expectedStat, actualStat, destFileIsOlder,
     }
 };
 
+let overwriteAllComparison = function( expectedStat, actualStat, destFileIsOlder, filename ) {
+    // We don't need no stinkin' `destFileIsOlder` argument here!
+    expect( expectedStat.mtime, `<<< ${filename} >>>` ).is.same.moment( actualStat.mtime, 'second' );
+};
+
 let functions = {
 
     compareFileStats: function( expected, actual, replace ) {
@@ -35,7 +40,8 @@ let functions = {
             if ( _.isBoolean( compareTimestamps ) ) {
                 switch( replace ) {
                     case 'all':
-                        throw new Error( 'Unimplemented method' );
+                        // throw new Error( 'Unimplemented method' );
+                        overwriteAllComparison( expectedStat, actualStat, compareTimestamps, file );
                         break;
                     case 'old':
                         throw new Error( 'Unimplemented method' );
@@ -43,7 +49,11 @@ let functions = {
                     case 'none':
                         noOverwriteComparison( expectedStat, actualStat, compareTimestamps, file );
                         break;
-                    default: noOverwriteComparison( expectedStat, actualStat, compareTimestamps, file );
+                    case undefined:
+                        noOverwriteComparison( expectedStat, actualStat, compareTimestamps, file );
+                        break;
+                    default:
+                        throw new Error( 'Unknown comparison value: ' + replace );
                 }
             } else {
                 /**

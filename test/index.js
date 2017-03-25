@@ -16,11 +16,11 @@ describe( 'metalsmith-assets-improved', function() {
         files.purgeBuildDirs( fixtureRoot );
     } );
 
-    context( '(when given a configuration object)', function() {
+    after( function() {
+        files.purgeTempFiles();
+    } );
 
-        after( function() {
-            files.purgeTempFiles();
-        } );
+    context( '(when given a configuration object)', function() {
 
         it( 'copies files from the default source directory to the default destination directory', function( done ) {
             let fixturePath = path.resolve( fixtureRoot, 'basic' );
@@ -102,9 +102,35 @@ describe( 'metalsmith-assets-improved', function() {
                     done();
                 } );
         } );
-        it( 'copies only new files when the "replace" option is set to "none"' );
-        it( 'overwrites files when the "replace" option is set to "all"' );
+
+        it( 'overwrites files when the "replace" option is set to "all"', function( done ) {
+            let fixturePath = path.resolve( fixtureRoot, 'replace3' );
+
+            // Create a set of duplicate files, one older and one newer
+            files.createTempFilePair( fixturePath, null, true );
+            files.createTempFilePair( fixturePath, null, false );
+
+            let metalsmith = Metalsmith( fixturePath );
+            let assetOptions = {
+                replace: 'all'
+            };
+            metalsmith
+                .clean( false )
+                .use( assets( assetOptions ) )
+                .build( function( err ) {
+                    if ( err ) return done( err );
+
+                    let expected = fn.getExpected( fixturePath );
+                    let actualFiles = files.readFileStats( path.resolve( fixturePath, 'build', '.' ) );
+                    fn.compareFileStats( expected.files, actualFiles, assetOptions.replace );
+
+                    done();
+                } );
+        } );
+
         it( 'only overwrites older files when the "replace" option is set to "old"' );
+
+        // TODO Test custom directories and overwrite options
     } );
 
     context( '(when given an array of configuration objects)', function() {

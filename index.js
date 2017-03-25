@@ -7,8 +7,17 @@ let _ = require( 'lodash' );
 
 let getFilter = function( replace, src, dest ) {
     let filter = null;
+    // console.log( `~~~ ${replace} ~~~` );
     switch ( replace ) {
-        default:        // This is used if `replace` is 'none' or undefined
+        case 'all':
+            filter = function() {
+                // To overwrite everything, return `true` always
+                return true;
+            };
+            break;
+        case 'none':
+            // fall through
+        case undefined:
             // Do not copy if destination file exists, regardless of modification time
             filter = function( file ) {
                 let destFile = resolveDestFile( file, dest );
@@ -18,7 +27,10 @@ let getFilter = function( replace, src, dest ) {
                 } else {
                     return true;
                 }
-            }
+            };
+            break;
+        default:
+            throw new Error( 'Unknown value for `replace` property: ' + replace );
     }
     return filter;
 };
@@ -55,7 +67,7 @@ let resolveDestFile = function( file, dest ) {
 let plugin = function plugin( options ) {
     // Make sure there is an `options` object with a `replace` property
     options = _.merge( {}, options );
-    if ( !_.has( 'replace' ) ) {
+    if ( !_.has( options, 'replace' ) ) {
         options.replace = undefined;
     }
 
