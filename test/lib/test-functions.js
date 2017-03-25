@@ -11,9 +11,9 @@ let expect = chai.expect;
 
 let noOverwriteComparison = function( expectedStat, actualStat, destFileIsOlder, filename ) {
     if ( destFileIsOlder ) {
-        expect( expectedStat.mtime, `<<< ${filename} >>>` ).is.after.moment( actualStat.mtime, 'second' );
-    } else {
         expect( expectedStat.mtime, `<<< ${filename} >>>` ).is.before.moment( actualStat.mtime, 'second' );
+    } else {
+        expect( expectedStat.mtime, `<<< ${filename} >>>` ).is.after.moment( actualStat.mtime, 'second' );
     }
 };
 

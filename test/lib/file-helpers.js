@@ -22,10 +22,11 @@ let createTempFilePair = function( workingDirectory, options, old ) {
         let duration = getRandomDuration();
         let destTime = srcTime.clone();
         if ( old ) {
-            destTime.subtract( duration );
-        } else {
             destTime.add( duration );
+        } else {
+            destTime.subtract( duration );
         }
+        // console.log( `!! ${old}: ${path.basename( srcPath )} ${srcTime} <--> ${destTime} !!` );
         fs.utimesSync( srcPath, srcTime.unix(), srcTime.unix() );
         fs.utimesSync( destPath, destTime.unix(), destTime.unix() );
     }
