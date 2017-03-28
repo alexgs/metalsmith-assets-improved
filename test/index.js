@@ -128,7 +128,30 @@ describe( 'metalsmith-assets-improved', function() {
                 } );
         } );
 
-        it( 'only overwrites older files when the "replace" option is set to "old"' );
+        it( 'only overwrites older files when the "replace" option is set to "old"', function( done ) {
+            let fixturePath = path.resolve( fixtureRoot, 'replace4' );
+
+            // Create a set of duplicate files, one older and one newer
+            files.createTempFilePair( fixturePath, null, true );
+            files.createTempFilePair( fixturePath, null, false );
+
+            let metalsmith = Metalsmith( fixturePath );
+            let assetOptions = {
+                replace: 'old'
+            };
+            metalsmith
+                .clean( false )
+                .use( assets( assetOptions ) )
+                .build( function( err ) {
+                    if ( err ) return done( err );
+
+                    let expected = fn.getExpected( fixturePath );
+                    let actualFiles = files.readFileStats( path.resolve( fixturePath, 'build', '.' ) );
+                    fn.compareFileStats( expected.files, actualFiles, assetOptions.replace );
+
+                    done();
+                } );
+        } );
 
         // TODO Test custom directories and overwrite options
     } );

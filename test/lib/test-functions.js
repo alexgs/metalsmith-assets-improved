@@ -9,6 +9,13 @@ chai.use( chaiMoment );
 chai.use( dirtyChai );
 let expect = chai.expect;
 
+/**
+ * In the comparison functions
+ *     - `expectedStat` is from the **source** file
+ *     - `actualStat` is from the **destination** file
+ *     - "older" means the **destination** file is _before_ the source file
+ */
+
 let noOverwriteComparison = function( expectedStat, actualStat, destFileIsOlder, filename ) {
     if ( destFileIsOlder ) {
         expect( expectedStat.mtime, `<<< ${filename} >>>` ).is.before.moment( actualStat.mtime, 'second' );
@@ -20,6 +27,14 @@ let noOverwriteComparison = function( expectedStat, actualStat, destFileIsOlder,
 let overwriteAllComparison = function( expectedStat, actualStat, destFileIsOlder, filename ) {
     // We don't need no stinkin' `destFileIsOlder` argument here!
     expect( expectedStat.mtime, `<<< ${filename} >>>` ).is.same.moment( actualStat.mtime, 'second' );
+};
+
+let overwriteOldComparison = function( expectedStat, actualStat, destFileIsOlder, filename ) {
+    if ( destFileIsOlder ) {
+        expect( expectedStat.mtime, `<<< ${filename} >>>` ).is.before.moment( actualStat.mtime, 'second' );
+    } else {
+        expect( expectedStat.mtime, `<<< ${filename} >>>` ).is.same.moment( actualStat.mtime, 'second' );
+    }
 };
 
 let functions = {
@@ -40,11 +55,10 @@ let functions = {
             if ( _.isBoolean( compareTimestamps ) ) {
                 switch( replace ) {
                     case 'all':
-                        // throw new Error( 'Unimplemented method' );
                         overwriteAllComparison( expectedStat, actualStat, compareTimestamps, file );
                         break;
                     case 'old':
-                        throw new Error( 'Unimplemented method' );
+                        overwriteOldComparison( expectedStat, actualStat, compareTimestamps, file );
                         break;
                     case 'none':
                         noOverwriteComparison( expectedStat, actualStat, compareTimestamps, file );

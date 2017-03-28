@@ -1,5 +1,6 @@
 let debug = require( 'debug' )( 'metalsmith-assets-improved' );
 let fs = require( 'fs-extra' );
+let moment = require( 'moment' );
 let path = require( 'path' );
 let _ = require( 'lodash' );
 
@@ -8,6 +9,7 @@ let _ = require( 'lodash' );
 let getFilter = function( replace, src, dest ) {
     let filter = null;
     // console.log( `~~~ ${replace} ~~~` );
+    // switch ( _.toLower( replace ) ) {
     switch ( replace ) {
         case 'all':
             filter = function() {
@@ -15,12 +17,26 @@ let getFilter = function( replace, src, dest ) {
                 return true;
             };
             break;
+        case 'old':
+            filter = function( srcFile ) {
+                let destFile = resolveDestFile( srcFile, dest );
+                if ( fs.existsSync( destFile ) ) {
+                    let srcStat = fs.statSync( srcFile );
+                    let destStat = fs.statSync( destFile );
+                    let srcTime = moment( srcStat.mtime );
+                    let destTime = moment( destStat.mtime );
+                    return destTime.isBefore( srcTime );
+                } else {
+                    return true;
+                }
+            };
+            break;
         case 'none':
             // fall through
         case undefined:
             // Do not copy if destination file exists, regardless of modification time
-            filter = function( file ) {
-                let destFile = resolveDestFile( file, dest );
+            filter = function( srcFile ) {
+                let destFile = resolveDestFile( srcFile, dest );
                 //noinspection RedundantIfStatementJS
                 if ( fs.existsSync( destFile ) ) {
                     return false;
