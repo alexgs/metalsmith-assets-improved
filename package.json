@@ -1,6 +1,6 @@
 {
   "name": "metalsmith-assets-improved",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0",
   "description": "Include static assets in a Metalsmith build",
   "main": "index.js",
   "engines": {

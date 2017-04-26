@@ -4,12 +4,8 @@ let moment = require( 'moment' );
 let path = require( 'path' );
 let _ = require( 'lodash' );
 
-// let metalsmithReplacer = require( './lib/utilities/metalsmithReplacer' );
-
 let getFilter = function( replace, src, dest ) {
     let filter = null;
-    // console.log( `~~~ ${replace} ~~~` );
-    // switch ( _.toLower( replace ) ) {
     switch ( replace ) {
         case 'all':
             filter = function() {
@@ -76,7 +72,7 @@ let resolveDestFile = function( file, dest ) {
  *     - 'old' (files in `dest` older than their counterparts in `src` will
  *       be overwritten)
  *     - 'none' (no files in `dest` will be overwritten, but files in `src`
- *       without a counterpart will be copied to `dest`.
+ *       without a counterpart will be copied to `dest`)
  *   Defaults to 'none'.
  * @returns {Function} Worker for the Metalsmith build process
  */
