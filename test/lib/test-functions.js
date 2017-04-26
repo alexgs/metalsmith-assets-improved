@@ -43,7 +43,8 @@ let functions = {
         let expectedFiles = _.keys( expected );
         let actualFiles = _.keys( actual );
 
-        expect( actualFiles ).to.include.members( expectedFiles );
+        expect( actualFiles.length ).to.be.greaterThan( 0 );
+        expect( actualFiles ).to.include.all.members( expectedFiles );
 
         expectedFiles.forEach( file => {
             let actualStat = actual[ file ];

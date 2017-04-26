@@ -153,7 +153,58 @@ describe( 'metalsmith-assets-improved', function() {
                 } );
         } );
 
-        // TODO Test custom directories and overwrite options
+        it( 'overwrites files in a custom directory when the "replace" option is set to "all"', function( done ) {
+            let fixturePath = path.resolve( fixtureRoot, 'replace5' );
+            let metalsmith = Metalsmith( fixturePath );
+            let assetOptions = {
+                src: 'static',
+                dest: 'static',
+                replace: 'all'
+            };
+
+            // Create a set of duplicate files, one older and one newer
+            files.createTempFilePair( fixturePath, assetOptions, true );
+            files.createTempFilePair( fixturePath, assetOptions, false );
+
+            metalsmith
+                .clean( false )
+                .use( assets( assetOptions ) )
+                .build( function( err ) {
+                    if ( err ) return done( err );
+
+                    let expected = fn.getExpected( fixturePath, assetOptions );
+                    let actualFiles = files.readFileStats( path.resolve( fixturePath, 'build', assetOptions.dest ) );
+                    fn.compareFileStats( expected.files, actualFiles, assetOptions.replace );
+                    done();
+                } );
+        } );
+
+        it( 'only overwrites older files in a custom directory when the "replace" option is set to "old"', function( done ) {
+            let fixturePath = path.resolve( fixtureRoot, 'replace6' );
+            let metalsmith = Metalsmith( fixturePath );
+            let assetOptions = {
+                src: 'static',
+                dest: 'static',
+                replace: 'old'
+            };
+
+            // Create a set of duplicate files, one older and one newer
+            files.createTempFilePair( fixturePath, assetOptions, true );
+            files.createTempFilePair( fixturePath, assetOptions, false );
+
+            metalsmith
+                .clean( false )
+                .use( assets( assetOptions ) )
+                .build( function( err ) {
+                    if ( err ) return done( err );
+
+                    let expected = fn.getExpected( fixturePath, assetOptions );
+                    let actualFiles = files.readFileStats( path.resolve( fixturePath, 'build', assetOptions.dest ) );
+                    fn.compareFileStats( expected.files, actualFiles, assetOptions.replace );
+                    done();
+                } );
+        } );
+
     } );
 
     context( '(when given an array of configuration objects)', function() {
